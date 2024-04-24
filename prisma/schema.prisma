@@ -1,0 +1,129 @@
+// This is your Prisma schema file
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  ta_applicant
+  department_staff
+  ta_committee_member
+  instructor
+}
+
+enum Status {
+  accepted
+  pending
+  rejected
+}
+
+model User {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String   @unique
+  phone    String
+  password String
+  type     UserType
+
+  ta_applicant_id        String @unique @db.ObjectId
+  department_staff_id    String @unique @db.ObjectId
+  ta_committee_member_id String @unique @db.ObjectId
+  instructor_id          String @unique @db.ObjectId
+
+  ta_applicant        TaApplicant?       @relation(fields: [ta_applicant_id], references: [id])
+  department_staff    DepartmentStaff?   @relation(fields: [department_staff_id], references: [id])
+  ta_committee_member TaCommitteeMember? @relation(fields: [ta_committee_member_id], references: [id])
+  instructor          Instructor?        @relation(fields: [instructor_id], references: [id])
+  accepted_courses    Course[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model TaApplicant {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  accepted_courses_ids String[]
+  z_id                 String   @unique
+  department           String
+  level                String
+
+  user         User?
+  applications Application[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model DepartmentStaff {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  user            User?
+  courses_created Course[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model TaCommitteeMember {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  user User?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Instructor {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  user User?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Course {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  subject        String
+  crn_number     Int
+  course_number  Int
+  title          String
+  term           String
+  created_by_id  String  @db.ObjectId
+  assigned_to_id String? @db.ObjectId
+  feedback       String?
+
+  applications Application[]   @relation(name: "applications")
+  created_by   DepartmentStaff @relation(fields: [created_by_id], references: [id])
+  assgined_to  User?           @relation(fields: [assigned_to_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Application {
+  id                       String  @id @default(auto()) @map("_id") @db.ObjectId
+  ta_applicant_id          String  @db.ObjectId
+  has_served_before        Boolean
+  previous_service_details String?
+  cv_link                  String
+  credit_completed         Int
+  credit_registered        Int
+  major                    String
+  course_id                String  @db.ObjectId
+  recommended              Boolean @default(false)
+  offered                  Status  @default(pending)
+  accepted                 Status  @default(pending)
+
+  ta_applicant TaApplicant @relation(fields: [ta_applicant_id], references: [id])
+  course       Course      @relation(fields: [course_id], references: [id], name: "applications")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
