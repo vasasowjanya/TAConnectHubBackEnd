@@ -7,7 +7,7 @@ import prisma from '../config/prisma.js';
 const app = express();
 app.use(express.json());
 
-app.use(cors({ allowedHeaders: '*' }));
+app.use(cors());
 
 app.use('/api/v1', router);
 app.use(globalErrorHandler);
