@@ -29,12 +29,11 @@ const auth = (...requiredRoles) => {
 
             const jwtUser = await prisma.user.findUnique({
                 where: { id: verifiedUser.id },
-                include: { assigned_hqs: true },
             });
 
             req.jwtUser = jwtUser;
 
-            if (requiredRoles.length && !requiredRoles.includes(jwtUser.role)) {
+            if (requiredRoles.length && !requiredRoles.includes(jwtUser.type)) {
                 throw new ApiError(status.FORBIDDEN, 'JWT Error: Forbidden');
             }
             next();

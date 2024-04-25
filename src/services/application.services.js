@@ -1,6 +1,7 @@
 import calculatePagination from '../utils/calculatePagination.js';
 import prisma from '../config/prisma.js';
 import { courseServices } from './course.services.js';
+import { application } from 'express';
 
 const createApplication = async (data) => {
     return await prisma.application.create({ data });
@@ -66,20 +67,31 @@ const getPaginatedApplicaitons = async (filters, options) => {
 };
 
 const updateApplication = async (id, data) => {
+    const app = await prisma.application.findUnique({
+        where: { id },
+        include: { course: true },
+    });
+
+    if (app.course.assigned_to_id)
+        throw new Error('Application already accepted, beter luck next time');
+
     return prisma.$transaction(async (tx) => {
-        const application = await prisma.application.update({
+        const updatedApplication = await prisma.application.update({
             where: { id },
+            include: { ta_applicant: { include: { accepted_courses: true } } },
             data,
         });
 
         if (data.accepted === 'accepted') {
+            if (updatedApplication.ta_applicant.accepted_courses.length)
+                throw new Error('You already selected one course');
             await tx.course.update({
-                where: { id: application.course_id },
-                data: { assigned_to_id: application.ta_applicant_id },
+                where: { id: updatedApplication.course_id },
+                data: { assigned_to_id: updatedApplication.ta_applicant_id },
             });
         }
 
-        return application;
+        return updatedApplication;
     });
 };
 
