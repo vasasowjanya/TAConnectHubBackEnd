@@ -9,6 +9,10 @@ const createApplication = async (data) => {
 const getApplicationById = async (id) => {
     return await prisma.application.findUnique({
         where: { id },
+        include: {
+            course: true,
+            ta_applicant: { include: { ta_applicant: true } },
+        },
     });
 };
 
@@ -43,6 +47,10 @@ const getPaginatedApplicaitons = async (filters, options) => {
     const result = await prisma.application.findMany({
         where: whereConditions,
         orderBy: { [sortBy]: sortOrder },
+        include: {
+            course: true,
+            ta_applicant: { include: { ta_applicant: true } },
+        },
         skip: get_all == 'true' ? 0 : skip,
         take: get_all == 'true' ? undefined : limit,
     });

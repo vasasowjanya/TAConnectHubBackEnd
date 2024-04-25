@@ -36,6 +36,18 @@ const getPaginatedCourses = async (filters, options) => {
     const result = await prisma.course.findMany({
         where: whereConditions,
         orderBy: { [sortBy]: sortOrder },
+        include: {
+            applications: {
+                include: {
+                    ta_applicant: {
+                        include: {
+                            ta_applicant: true,
+                        },
+                    },
+                },
+            },
+            assgined_to: true,
+        },
         skip: get_all == 'true' ? 0 : skip,
         take: get_all == 'true' ? undefined : limit,
     });

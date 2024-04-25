@@ -39,6 +39,7 @@ const getPaginatedApplications = async (req, res, next) => {
             'search',
             'get_all',
             'ta_applicant_id',
+            'offered',
         ]);
         const options = pick(req.query, [
             'sortBy',

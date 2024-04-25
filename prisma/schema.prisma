@@ -42,8 +42,9 @@ model User {
   instructor          Instructor?        @relation(fields: [instructor_id], references: [id])
   accepted_courses    Course[]
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  applicaitons Application[]
 }
 
 model TaApplicant {
@@ -53,8 +54,7 @@ model TaApplicant {
   department           String
   level                String
 
-  user         User?
-  applications Application[]
+  user User?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -121,8 +121,8 @@ model Application {
   offered                  Status  @default(pending)
   accepted                 Status  @default(pending)
 
-  ta_applicant TaApplicant @relation(fields: [ta_applicant_id], references: [id])
-  course       Course      @relation(fields: [course_id], references: [id], name: "applications")
+  ta_applicant User   @relation(fields: [ta_applicant_id], references: [id])
+  course       Course @relation(fields: [course_id], references: [id], name: "applications")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
