@@ -43,4 +43,20 @@ const login = z.object({
         .strict(),
 });
 
-export const authValidators = { login, signup };
+const updateProfile = z.object({
+    body: z.strictObject({
+        name: z.string().optional(),
+        phone: z.string().optional(),
+        password: z.string().optional(),
+        new_password: z
+            .string({ required_error: 'Password is required' })
+            .min(8, { message: 'Password must be at least 8 characters' }) // Minimum length of 8 characters
+            .regex(
+                /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+                'Password must contain at least one lowercase letter, one uppercase letter, one digit, and one special character.',
+            )
+            .optional(), // Regex for alphanumeric and special characters
+    }),
+});
+
+export const authValidators = { login, signup, updateProfile };

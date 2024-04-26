@@ -57,4 +57,25 @@ const login = async (req, res, next) => {
     }
 };
 
-export const authController = { login, signup };
+const updateProfile = async (req, res, next) => {
+    try {
+        const jwtUser = req.jwtUser;
+        const { id } = req.params;
+        const data = req.body;
+
+        if (jwtUser.id !== id)
+            throw new ApiError(status.FORBIDDEN, 'Forbidden');
+
+        const response = await authServices.updateProfile(id, data);
+
+        res.status(status.OK).json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: response,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const authController = { login, signup, updateProfile };
