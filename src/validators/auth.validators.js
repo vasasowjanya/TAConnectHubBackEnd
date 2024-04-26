@@ -10,7 +10,11 @@ const signup = z.object({
                 .toLowerCase(),
             password: z
                 .string({ required_error: 'Password is required' })
-                .min(8),
+                .min(8, { message: 'Password must be at least 8 characters' }) // Minimum length of 8 characters
+                .regex(
+                    /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+                    'Password must contain at least one lowercase letter, one uppercase letter, one digit, and one special character.',
+                ), // Regex for alphanumeric and special characters
             phone: z.string({ required_error: 'Phone number is required' }),
             type: z.string(),
         }),
